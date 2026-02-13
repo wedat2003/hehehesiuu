@@ -303,7 +303,6 @@
     let t = 0;
     let running = false;
     let bouquetScale = 1;
-    let isSmallScreen = false;
 
     const flowers = [];
     const petals = [];
@@ -313,10 +312,9 @@
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = window.innerWidth;
       h = window.innerHeight;
-      isSmallScreen = w <= 700;
       const shortSide = Math.min(w, h);
-      bouquetScale = isSmallScreen
-        ? Math.max(0.68, Math.min(0.92, shortSide / 470))
+      bouquetScale = w <= 700
+        ? Math.max(0.58, Math.min(0.86, shortSide / 430))
         : 1;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
@@ -345,10 +343,10 @@
 
       draw(time) {
         const bunchX = w * 0.5;
-        const bunchY = h * (isSmallScreen ? 0.78 : 0.84);
+        const bunchY = h * 0.84;
 
         const arcX = w * 0.5;
-        const arcY = h * (isSmallScreen ? 0.42 : 0.47);
+        const arcY = h * 0.47;
 
         // Symmetric bouquet arc: left/right spread from angle, vertical depth from cosine.
         const scaledRadius = this.radius * bouquetScale;
@@ -724,17 +722,11 @@
       petals.length = 0;
       sparks.length = 0;
 
-      const rows = isSmallScreen
-        ? [
-            { count: 6, radius: Math.min(w * 0.24, 200), row: 0 },
-            { count: 5, radius: Math.min(w * 0.18, 162), row: 1 },
-            { count: 4, radius: Math.min(w * 0.135, 126), row: 2 }
-          ]
-        : [
-            { count: 7, radius: Math.min(w * 0.25, 235), row: 0 },
-            { count: 6, radius: Math.min(w * 0.19, 192), row: 1 },
-            { count: 5, radius: Math.min(w * 0.14, 148), row: 2 }
-          ];
+      const rows = [
+        { count: 7, radius: Math.min(w * 0.25, 235), row: 0 },
+        { count: 6, radius: Math.min(w * 0.19, 192), row: 1 },
+        { count: 5, radius: Math.min(w * 0.14, 148), row: 2 }
+      ];
 
       rows.forEach((group, gi) => {
         for (let i = 0; i < group.count; i++) {
@@ -745,8 +737,8 @@
         }
       });
 
-      for (let i = 0; i < (isSmallScreen ? 52 : 75); i++) petals.push(new Petal(true));
-      for (let i = 0; i < (isSmallScreen ? 70 : 90); i++) sparks.push(new Spark());
+      for (let i = 0; i < 75; i++) petals.push(new Petal(true));
+      for (let i = 0; i < 90; i++) sparks.push(new Spark());
     }
 
     function drawBackground(time) {
@@ -764,8 +756,8 @@
 
     function drawWrap() {
       const cx = w * 0.5;
-      const by = h * (isSmallScreen ? 0.78 : 0.84);
-      const wrapScale = isSmallScreen ? Math.max(0.78, bouquetScale * 0.95) : 1;
+      const by = h * 0.84;
+      const wrapScale = bouquetScale;
       const halfTop = 170 * wrapScale;
       const halfBottom = 94 * wrapScale;
       const topY = by - 12 * wrapScale;
