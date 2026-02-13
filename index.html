@@ -304,6 +304,7 @@
     let running = false;
     let bouquetScale = 1;
     let compactMobile = false;
+    let phoneLayout = false;
 
     const flowers = [];
     const petals = [];
@@ -314,10 +315,11 @@
       w = window.innerWidth;
       h = window.innerHeight;
       compactMobile = w <= 430;
-      if (w <= 700) {
-        // iPhone-first scaling: keep the same desktop composition, just smaller.
+      phoneLayout = w <= 700;
+      if (phoneLayout) {
+        // Keep desktop composition feeling, but tune for tall phone screens.
         const iphoneScale = Math.min(w / 390, h / 844);
-        bouquetScale = Math.max(0.5, Math.min(0.74, iphoneScale * 0.62));
+        bouquetScale = Math.max(0.86, Math.min(1.02, iphoneScale * 0.96));
       } else {
         bouquetScale = 1;
       }
@@ -348,13 +350,14 @@
 
       draw(time) {
         const bunchX = w * 0.5;
-        const bunchY = h * 0.84;
+        const bunchY = h * (phoneLayout ? 0.74 : 0.84);
 
         const arcX = w * 0.5;
-        const arcY = h * 0.47;
+        const arcY = h * (phoneLayout ? 0.34 : 0.47);
 
         // Symmetric bouquet arc: left/right spread from angle, vertical depth from cosine.
-        const scaledRadius = this.radius * bouquetScale;
+        const spreadScale = phoneLayout ? 1.22 : 1;
+        const scaledRadius = this.radius * bouquetScale * spreadScale;
         const xOffset = Math.sin(this.angle) * scaledRadius;
         const yOffset = -Math.cos(this.angle) * scaledRadius * 0.42 + this.row * (38 * bouquetScale) + 10 + (this.kindLift * bouquetScale);
         const sway = Math.sin(time * 0.001 + this.phase) * (1.1 + this.row * 0.45);
@@ -768,8 +771,8 @@
 
     function drawWrap() {
       const cx = w * 0.5;
-      const by = h * 0.84;
-      const wrapScale = bouquetScale;
+      const by = h * (phoneLayout ? 0.74 : 0.84);
+      const wrapScale = phoneLayout ? bouquetScale * 1.04 : bouquetScale;
       const halfTop = 170 * wrapScale;
       const halfBottom = 94 * wrapScale;
       const topY = by - 12 * wrapScale;
