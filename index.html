@@ -425,8 +425,10 @@
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.moveTo(0, 0);
-      ctx.quadraticCurveTo(len * 0.44, -wid, len, 0);
-      ctx.quadraticCurveTo(len * 0.41, wid * 0.82, 0, 0);
+      // Slightly asymmetric, pointed blade for a more natural leaf silhouette.
+      ctx.quadraticCurveTo(len * 0.42, -wid * 1.08, len * 0.96, -wid * 0.08);
+      ctx.quadraticCurveTo(len * 1.04, 0, len * 0.96, wid * 0.06);
+      ctx.quadraticCurveTo(len * 0.41, wid * 0.9, 0, 0);
       ctx.fill();
 
       ctx.strokeStyle = veinColor;
@@ -434,6 +436,19 @@
       ctx.beginPath();
       ctx.moveTo(1, 0);
       ctx.lineTo(len * 0.88, 0);
+      ctx.stroke();
+
+      // Soft side veins.
+      ctx.lineWidth = Math.max(0.45, wid * 0.07);
+      ctx.beginPath();
+      ctx.moveTo(len * 0.24, 0);
+      ctx.lineTo(len * 0.48, -wid * 0.34);
+      ctx.moveTo(len * 0.24, 0);
+      ctx.lineTo(len * 0.48, wid * 0.34);
+      ctx.moveTo(len * 0.5, 0);
+      ctx.lineTo(len * 0.72, -wid * 0.26);
+      ctx.moveTo(len * 0.5, 0);
+      ctx.lineTo(len * 0.72, wid * 0.26);
       ctx.stroke();
 
       ctx.restore();
@@ -469,8 +484,8 @@
         bx,
         by,
         branchAngle + side * 0.06,
-        30 * centerMul,
-        10.5 * centerMul,
+        36 * centerMul,
+        13.2 * centerMul,
         'rgba(154, 214, 144, 0.96)',
         'rgba(66, 122, 72, 0.95)',
         'rgba(228, 255, 230, 0.34)'
@@ -479,8 +494,8 @@
         bx - Math.cos(branchAngle) * (2.8 * scale),
         by - Math.sin(branchAngle) * (2.8 * scale),
         branchAngle + side * 0.56,
-        24 * sideMulA,
-        8.7 * sideMulA,
+        29 * sideMulA,
+        10.4 * sideMulA,
         'rgba(143, 206, 136, 0.95)',
         'rgba(61, 114, 70, 0.94)',
         'rgba(220, 248, 224, 0.3)'
@@ -489,8 +504,8 @@
         bx - Math.cos(branchAngle) * (2.8 * scale),
         by - Math.sin(branchAngle) * (2.8 * scale),
         branchAngle - side * 0.54,
-        24 * sideMulB,
-        8.7 * sideMulB,
+        29 * sideMulB,
+        10.4 * sideMulB,
         'rgba(143, 206, 136, 0.95)',
         'rgba(61, 114, 70, 0.94)',
         'rgba(220, 248, 224, 0.3)'
@@ -517,8 +532,8 @@
         lx,
         ly,
         leafAngle,
-        28 * scale * lenMul,
-        4.8 * scale * widMul,
+        36 * scale * lenMul,
+        6.4 * scale * widMul,
         'rgba(161, 218, 148, 0.96)',
         'rgba(73, 133, 80, 0.95)',
         'rgba(226, 255, 226, 0.3)'
