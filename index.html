@@ -302,6 +302,8 @@
     let h = 0;
     let t = 0;
     let running = false;
+    let bouquetScale = 1;
+    let isSmallScreen = false;
 
     const flowers = [];
     const petals = [];
@@ -311,6 +313,11 @@
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       w = window.innerWidth;
       h = window.innerHeight;
+      isSmallScreen = w <= 700;
+      const shortSide = Math.min(w, h);
+      bouquetScale = isSmallScreen
+        ? Math.max(0.68, Math.min(0.92, shortSide / 470))
+        : 1;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -338,26 +345,27 @@
 
       draw(time) {
         const bunchX = w * 0.5;
-        const bunchY = h * 0.84;
+        const bunchY = h * (isSmallScreen ? 0.78 : 0.84);
 
         const arcX = w * 0.5;
-        const arcY = h * 0.47;
+        const arcY = h * (isSmallScreen ? 0.42 : 0.47);
 
         // Symmetric bouquet arc: left/right spread from angle, vertical depth from cosine.
-        const xOffset = Math.sin(this.angle) * this.radius;
-        const yOffset = -Math.cos(this.angle) * this.radius * 0.42 + this.row * 38 + 10 + this.kindLift;
+        const scaledRadius = this.radius * bouquetScale;
+        const xOffset = Math.sin(this.angle) * scaledRadius;
+        const yOffset = -Math.cos(this.angle) * scaledRadius * 0.42 + this.row * (38 * bouquetScale) + 10 + (this.kindLift * bouquetScale);
         const sway = Math.sin(time * 0.001 + this.phase) * (1.1 + this.row * 0.45);
 
         const fx = arcX + xOffset + sway;
         const fy = arcY + yOffset;
 
-        const baseX = bunchX + this.angle * 40;
+        const baseX = bunchX + this.angle * (40 * bouquetScale);
         const baseY = bunchY + this.baseYOffset;
-        const cx = (baseX + fx) * 0.5 + this.stemCurveOffset + Math.sin(time * 0.0007 + this.phase) * 3;
+        const cx = (baseX + fx) * 0.5 + (this.stemCurveOffset * bouquetScale) + Math.sin(time * 0.0007 + this.phase) * 3;
         const cy = (baseY + fy) * 0.52;
 
         ctx.strokeStyle = 'rgba(106, 177, 124, 0.96)';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = Math.max(1.8, 3 * bouquetScale);
         ctx.beginPath();
         ctx.moveTo(baseX, baseY);
         ctx.quadraticCurveTo(cx, cy, fx, fy);
@@ -367,15 +375,15 @@
         // - peony: larger compound leaves with broad leaflets
         // - lily: multiple narrow lanceolate leaves along the stem
         if (this.kind === 'peony') {
-          drawPeonyCompoundLeaf(baseX, baseY, cx, cy, fx, fy, 0.35, this.angle < 0 ? 1 : -1, 1.15 + this.row * 0.1, time, this.phase);
-          drawPeonyCompoundLeaf(baseX, baseY, cx, cy, fx, fy, 0.62, this.angle < 0 ? -1 : 1, 1.0 + this.row * 0.08, time, this.phase + 0.8);
+          drawPeonyCompoundLeaf(baseX, baseY, cx, cy, fx, fy, 0.35, this.angle < 0 ? 1 : -1, (1.15 + this.row * 0.1) * bouquetScale, time, this.phase);
+          drawPeonyCompoundLeaf(baseX, baseY, cx, cy, fx, fy, 0.62, this.angle < 0 ? -1 : 1, (1.0 + this.row * 0.08) * bouquetScale, time, this.phase + 0.8);
         } else {
-          drawLilyStemLeaves(baseX, baseY, cx, cy, fx, fy, 0.24, 0.38, 0.52, 0.66, 0.79, 1.1 + this.row * 0.08, time, this.phase);
+          drawLilyStemLeaves(baseX, baseY, cx, cy, fx, fy, 0.24, 0.38, 0.52, 0.66, 0.79, (1.1 + this.row * 0.08) * bouquetScale, time, this.phase);
         }
 
         const size = this.kind === 'peony'
-          ? 44 + this.row * 8
-          : 38 + this.row * 6;
+          ? (44 + this.row * 8) * bouquetScale
+          : (38 + this.row * 6) * bouquetScale;
         const r = size * this.open;
 
         if (this.kind === 'peony') {
@@ -716,11 +724,17 @@
       petals.length = 0;
       sparks.length = 0;
 
-      const rows = [
-        { count: 7, radius: Math.min(w * 0.25, 235), row: 0 },
-        { count: 6, radius: Math.min(w * 0.19, 192), row: 1 },
-        { count: 5, radius: Math.min(w * 0.14, 148), row: 2 }
-      ];
+      const rows = isSmallScreen
+        ? [
+            { count: 6, radius: Math.min(w * 0.24, 200), row: 0 },
+            { count: 5, radius: Math.min(w * 0.18, 162), row: 1 },
+            { count: 4, radius: Math.min(w * 0.135, 126), row: 2 }
+          ]
+        : [
+            { count: 7, radius: Math.min(w * 0.25, 235), row: 0 },
+            { count: 6, radius: Math.min(w * 0.19, 192), row: 1 },
+            { count: 5, radius: Math.min(w * 0.14, 148), row: 2 }
+          ];
 
       rows.forEach((group, gi) => {
         for (let i = 0; i < group.count; i++) {
@@ -731,8 +745,8 @@
         }
       });
 
-      for (let i = 0; i < 75; i++) petals.push(new Petal(true));
-      for (let i = 0; i < 90; i++) sparks.push(new Spark());
+      for (let i = 0; i < (isSmallScreen ? 52 : 75); i++) petals.push(new Petal(true));
+      for (let i = 0; i < (isSmallScreen ? 70 : 90); i++) sparks.push(new Spark());
     }
 
     function drawBackground(time) {
@@ -750,27 +764,31 @@
 
     function drawWrap() {
       const cx = w * 0.5;
-      const by = h * 0.84;
+      const by = h * (isSmallScreen ? 0.78 : 0.84);
+      const wrapScale = isSmallScreen ? Math.max(0.78, bouquetScale * 0.95) : 1;
+      const halfTop = 170 * wrapScale;
+      const halfBottom = 94 * wrapScale;
+      const topY = by - 12 * wrapScale;
 
       ctx.fillStyle = 'rgba(232, 215, 184, 0.95)';
       ctx.strokeStyle = 'rgba(206, 179, 128, 0.9)';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = Math.max(1.5, 2 * wrapScale);
       ctx.beginPath();
-      ctx.moveTo(cx - 170, by - 12);
-      ctx.lineTo(cx + 170, by - 12);
-      ctx.lineTo(cx + 94, h + 8);
-      ctx.lineTo(cx - 94, h + 8);
+      ctx.moveTo(cx - halfTop, topY);
+      ctx.lineTo(cx + halfTop, topY);
+      ctx.lineTo(cx + halfBottom, h + 8);
+      ctx.lineTo(cx - halfBottom, h + 8);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
       ctx.fillStyle = 'rgba(217, 127, 171, 0.95)';
-      ctx.fillRect(cx - 92, by - 16, 184, 26);
+      ctx.fillRect(cx - 92 * wrapScale, by - 16 * wrapScale, 184 * wrapScale, 26 * wrapScale);
 
       ctx.fillStyle = '#fff6fb';
-      ctx.font = 'bold 16px Georgia, serif';
+      ctx.font = `bold ${Math.max(12, Math.round(16 * wrapScale))}px Georgia, serif`;
       ctx.textAlign = 'center';
-      ctx.fillText('Nefise', cx, by + 2);
+      ctx.fillText('Nefise', cx, by + (2 * wrapScale));
     }
 
     function animate(now) {
